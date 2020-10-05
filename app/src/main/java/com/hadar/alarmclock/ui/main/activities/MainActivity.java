@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ImageView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.hadar.alarmclock.data.AlarmsDataManager;
@@ -27,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
     private FloatingActionButton fab;
     private final int LAUNCH_SECOND_ACTIVITY = 1;
     public static int UNIQUE_ID = -1;
+    private ImageView imageView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
