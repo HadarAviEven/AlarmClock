@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">Alarm Clock</string>
+    <string name="set_alarm">Set Alarm</string>
+    <string name="colon_text_view">:</string>
+    <string name="title">Title</string>
+
+    <string name="sunday">Sun</string>
+    <string name="monday">Mon</string>
+    <string name="tuesday">Tue</string>
+    <string name="wednesday">Wed</string>
+    <string name="thursday">Thu</string>
+    <string name="friday">Fri</string>
+    <string name="saturday">Sat</string>
+
+    <string name="delete_alarm_dialog">Are you sure you want to delete this alarm?</string>
+    <string name="add_new_alarm">Add New Alarm</string>
+    <string name="hour">hour</string>
+    <string name="minute">minute</string>
+    <string name="hours_pattern">HH</string>
+    <string name="minutes_pattern">mm</string>
+    <string name="result_alarm">resultAlarm</string>
+    <string name="id">id</string>
+</resources>
