@@ -28,7 +28,6 @@ public class MainActivity extends AppCompatActivity {
     private FloatingActionButton fab;
     private final int LAUNCH_SECOND_ACTIVITY = 1;
     public static int UNIQUE_ID = -1;
-    private ImageView imageView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
