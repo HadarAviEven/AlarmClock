@@ -1,5 +1,6 @@
 package com.hadar.alarmclock.data;
 
+import com.hadar.alarmclock.ui.addalarm.enums.Days;
 import com.hadar.alarmclock.ui.addalarm.models.Alarm;
 import com.hadar.alarmclock.ui.main.events.DataSyncEvent;
 
@@ -45,5 +46,11 @@ public class AlarmsDataManager {
 
     private void notifyOnListChanged() {
         EventBus.getDefault().post(new DataSyncEvent("Sync SuccessFully"));
+    }
+
+    public void addFakeData() {
+        for (int i = 0; i < 13; i++) {
+            alarmsArrayList.add(new Alarm(true, i, 0, new ArrayList<Days>()));
+        }
     }
 }

@@ -53,6 +53,10 @@ public class Alarm implements Parcelable {
         return days;
     }
 
+    public void setSelectedDays(ArrayList<Days> days) {
+        this.days = days;
+    }
+
     public int getId() {
         return id;
     }
@@ -79,7 +83,7 @@ public class Alarm implements Parcelable {
         this.status = in.readByte() != 0;
         this.hour = in.readInt();
         this.minute = in.readInt();
-        this.days = new ArrayList<Days>();
+        this.days = new ArrayList<>();
         in.readList(this.days, Days.class.getClassLoader());
         this.id = in.readInt();
     }

@@ -50,6 +50,9 @@ public class MainActivity extends AppCompatActivity {
 
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(alarmAdapter);
+
+//        AlarmsDataManager.getInstance().addFakeData();
+//        alarmAdapter.notifyDataSetChanged();
     }
 
     private void initFab() {
