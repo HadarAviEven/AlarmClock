@@ -3,11 +3,9 @@ package com.hadar.alarmclock.ui.main;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CompoundButton;
 import android.widget.TextView;
 
 import com.hadar.alarmclock.ui.addalarm.helpers.SetAlarmHelper;
@@ -44,6 +42,8 @@ public class AlarmAdapter extends RecyclerView.Adapter<AlarmViewHolder> {
         Alarm currentItem = alarmsArrayList.get(position);
         setAlarm(holder, position, currentItem);
         setListener(holder, position);
+
+//        changeAlarmVisibility(holder.time, currentItem.getStatus());
     }
 
     private void setAlarm(final AlarmViewHolder holder, final int position, Alarm currentItem) {
@@ -65,16 +65,16 @@ public class AlarmAdapter extends RecyclerView.Adapter<AlarmViewHolder> {
 //        });
 
 
-        holder.status.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                changeAlarmStatus(position, isChecked);
-                changeAlarmVisibility(holder.time, isChecked);
-                changeAlarmSetHelper(position, false);
-            }
-        });
-
-        holder.status.setChecked(currentItem.getStatus());
+//        holder.status.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+//            @Override
+//            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+//                changeAlarmStatus(position, isChecked);
+//                changeAlarmVisibility(holder.time, isChecked);
+//                changeAlarmSetHelper(position, false);
+//            }
+//        });
+//
+//        holder.status.setChecked(currentItem.getStatus());
 
 
 //        holder.status.setOnCheckedChangeListener(null);
@@ -91,17 +91,17 @@ public class AlarmAdapter extends RecyclerView.Adapter<AlarmViewHolder> {
 //        });
 
 
-//        holder.status.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                boolean isChecked = holder.status.isChecked();
-//                changeAlarmStatus(position, isChecked);
-//                changeAlarmVisibility(holder.time, isChecked);
-//                changeAlarmSetHelper(position, false);
-//            }
-//        });
-//
-//        holder.status.setChecked(currentItem.getStatus());
+        holder.status.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                boolean isChecked = holder.status.isChecked();
+                changeAlarmStatus(position, isChecked);
+                changeAlarmVisibility(holder.time, isChecked);
+                changeAlarmSetHelper(position, false);
+            }
+        });
+
+        holder.status.setChecked(currentItem.getStatus());
     }
 
     private void changeAlarmStatus(int position, boolean isChecked) {
@@ -124,6 +124,7 @@ public class AlarmAdapter extends RecyclerView.Adapter<AlarmViewHolder> {
     private void setTime(AlarmViewHolder holder, Alarm currentItem) {
         String time = currentItem.getStringHour() + ":" + (currentItem.getStringMinute());
         holder.time.setText(time);
+        changeAlarmVisibility(holder.time, currentItem.getStatus());
     }
 
     private void setDays(AlarmViewHolder holder, Alarm currentItem) {
@@ -147,7 +148,6 @@ public class AlarmAdapter extends RecyclerView.Adapter<AlarmViewHolder> {
     }
 
     private void turnOnOffAlarm(TextView time, int color) {
-        Log.e("AlarmAdapter", "color changed at: " + time.getText().toString());
         time.setTextColor(color);
     }
 
