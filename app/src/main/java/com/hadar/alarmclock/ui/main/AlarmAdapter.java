@@ -42,8 +42,6 @@ public class AlarmAdapter extends RecyclerView.Adapter<AlarmViewHolder> {
         Alarm currentItem = alarmsArrayList.get(position);
         setAlarm(holder, position, currentItem);
         setListener(holder, position);
-
-//        changeAlarmVisibility(holder.time, currentItem.getStatus());
     }
 
     private void setAlarm(final AlarmViewHolder holder, final int position, Alarm currentItem) {
@@ -52,7 +50,7 @@ public class AlarmAdapter extends RecyclerView.Adapter<AlarmViewHolder> {
         setDays(holder, currentItem);
     }
 
-    private void setStatus(final AlarmViewHolder holder, Alarm currentItem, final int position) {
+    private void setStatus(final AlarmViewHolder holder, final Alarm currentItem, final int position) {
 //        holder.status.setChecked(currentItem.getStatus());
 //
 //        holder.status.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -95,28 +93,21 @@ public class AlarmAdapter extends RecyclerView.Adapter<AlarmViewHolder> {
             @Override
             public void onClick(View v) {
                 boolean isChecked = holder.status.isChecked();
-                changeAlarmStatus(position, isChecked);
-                changeAlarmVisibility(holder.time, isChecked);
-                changeAlarmSetHelper(position, false);
+                updateStatus(position, isChecked);
+                updateTimeColor(holder.time, isChecked);
+                updateDaysColor(holder, currentItem);
+                updateAlarmSetHelper(position, false);
             }
         });
 
         holder.status.setChecked(currentItem.getStatus());
     }
 
-    private void changeAlarmStatus(int position, boolean isChecked) {
+    private void updateStatus(int position, boolean isChecked) {
         AlarmsDataManager.getInstance().setStatus(position, isChecked);
     }
 
-    private void changeAlarmVisibility(TextView time, boolean isChecked) {
-        if (!isChecked) {
-            turnOnOffAlarm(time, ContextCompat.getColor(context, R.color.gray));
-        } else {
-            turnOnOffAlarm(time, ContextCompat.getColor(context, R.color.black));
-        }
-    }
-
-    private void changeAlarmSetHelper(int position, boolean isDeleted) {
+    private void updateAlarmSetHelper(int position, boolean isDeleted) {
         SetAlarmHelper setAlarmHelper = new SetAlarmHelper(context);
         setAlarmHelper.startAlarm(alarmsArrayList.get(position), isDeleted);
     }
@@ -124,31 +115,60 @@ public class AlarmAdapter extends RecyclerView.Adapter<AlarmViewHolder> {
     private void setTime(AlarmViewHolder holder, Alarm currentItem) {
         String time = currentItem.getStringHour() + ":" + (currentItem.getStringMinute());
         holder.time.setText(time);
-        changeAlarmVisibility(holder.time, currentItem.getStatus());
+        updateTimeColor(holder.time, currentItem.getStatus());
     }
 
-    private void setDays(AlarmViewHolder holder, Alarm currentItem) {
-//        for (Days day: Days.values()) {
-//        }
-        setDaysColor(currentItem, holder.sunday, Days.Sun);
-        setDaysColor(currentItem, holder.monday, Days.Mon);
-        setDaysColor(currentItem, holder.tuesday, Days.Tue);
-        setDaysColor(currentItem, holder.wednesday, Days.Wed);
-        setDaysColor(currentItem, holder.thursday, Days.Thu);
-        setDaysColor(currentItem, holder.friday, Days.Fri);
-        setDaysColor(currentItem, holder.saturday, Days.Sat);
-    }
-
-    private void setDaysColor(Alarm currentItem, TextView holderDay, Days day) {
-        if (currentItem.getSelectedDays().contains(Days.valueOf(day.name()))) {
-            holderDay.setTextColor(ContextCompat.getColor(context, R.color.blue));
+    private void updateTimeColor(TextView time, boolean isChecked) {
+        if (!isChecked) {
+            updateTextViewColor(time, ContextCompat.getColor(context, R.color.gray));
         } else {
-            holderDay.setTextColor(ContextCompat.getColor(context, R.color.gray));
+            updateTextViewColor(time, ContextCompat.getColor(context, R.color.black));
         }
     }
 
-    private void turnOnOffAlarm(TextView time, int color) {
-        time.setTextColor(color);
+    private void setDays(AlarmViewHolder holder, Alarm currentItem) {
+        setTextDay(holder);
+        updateDaysColor(holder, currentItem);
+    }
+
+    private void setTextDay(AlarmViewHolder holder) {
+//        for (Days day: Days.values()) {
+//        }
+        holder.sunday.setText(R.string.sunday);
+        holder.monday.setText(R.string.monday);
+        holder.tuesday.setText(R.string.tuesday);
+        holder.wednesday.setText(R.string.wednesday);
+        holder.thursday.setText(R.string.thursday);
+        holder.friday.setText(R.string.friday);
+        holder.saturday.setText(R.string.saturday);
+    }
+
+    private void updateDaysColor(AlarmViewHolder holder, Alarm currentItem) {
+//        for (Days day: Days.values()) {
+//        }
+        updateSpecificDayColor(currentItem, holder.sunday, Days.Sun);
+        updateSpecificDayColor(currentItem, holder.monday, Days.Mon);
+        updateSpecificDayColor(currentItem, holder.tuesday, Days.Tue);
+        updateSpecificDayColor(currentItem, holder.wednesday, Days.Wed);
+        updateSpecificDayColor(currentItem, holder.thursday, Days.Thu);
+        updateSpecificDayColor(currentItem, holder.friday, Days.Fri);
+        updateSpecificDayColor(currentItem, holder.saturday, Days.Sat);
+    }
+
+    private void updateSpecificDayColor(Alarm currentItem, TextView holderDay, Days day) {
+        if (currentItem.getSelectedDays().contains(Days.valueOf(day.name()))) {
+            if (!currentItem.getStatus()) {
+                updateTextViewColor(holderDay, ContextCompat.getColor(context, R.color.light_blue));
+            } else {
+                updateTextViewColor(holderDay, ContextCompat.getColor(context, R.color.blue));
+            }
+        } else {
+            updateTextViewColor(holderDay, ContextCompat.getColor(context, R.color.gray));
+        }
+    }
+
+    private void updateTextViewColor(TextView textView, int color) {
+        textView.setTextColor(color);
     }
 
     private void setListener(final AlarmViewHolder holder, final int position) {
@@ -167,7 +187,7 @@ public class AlarmAdapter extends RecyclerView.Adapter<AlarmViewHolder> {
         alertDialogBuilder.setPositiveButton("yes", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface arg0, int arg1) {
-                changeAlarmSetHelper(position, true);
+                updateAlarmSetHelper(position, true);
                 AlarmsDataManager.getInstance().removeAlarm(position);
             }
         });
