@@ -10,6 +10,7 @@ import com.hadar.alarmclock.data.AlarmsDataManager;
 import com.hadar.alarmclock.R;
 import com.hadar.alarmclock.ui.addalarm.activities.AddAlarmActivity;
 import com.hadar.alarmclock.ui.addalarm.models.Alarm;
+import com.hadar.alarmclock.ui.main.EmptyRecyclerView;
 import com.hadar.alarmclock.ui.main.events.DataSyncEvent;
 import com.hadar.alarmclock.ui.main.AlarmAdapter;
 
@@ -22,7 +23,7 @@ import de.greenrobot.event.EventBus;
 
 public class MainActivity extends AppCompatActivity {
 
-    private RecyclerView recyclerView;
+    private EmptyRecyclerView recyclerView;
     private AlarmAdapter alarmAdapter;
     private FloatingActionButton fab;
     private final int LAUNCH_SECOND_ACTIVITY = 1;
@@ -36,6 +37,8 @@ public class MainActivity extends AppCompatActivity {
         findViews();
         initRecyclerView();
         initFab();
+
+//        fakeDataForTests();
     }
 
     private void findViews() {
@@ -46,13 +49,10 @@ public class MainActivity extends AppCompatActivity {
     private void initRecyclerView() {
         recyclerView.setHasFixedSize(true);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
-        alarmAdapter = new AlarmAdapter(AlarmsDataManager.getInstance().alarmsArrayList, this);
-
         recyclerView.setLayoutManager(layoutManager);
+        alarmAdapter = new AlarmAdapter(AlarmsDataManager.getInstance().alarmsArrayList, this);
+        recyclerView.setEmptyView(findViewById(R.id.emptyView));
         recyclerView.setAdapter(alarmAdapter);
-
-//        AlarmsDataManager.getInstance().addFakeData();
-//        alarmAdapter.notifyDataSetChanged();
     }
 
     private void initFab() {
@@ -96,6 +96,11 @@ public class MainActivity extends AppCompatActivity {
 
     @Subscribe
     public void onEvent(DataSyncEvent syncStatusMessage) {
+        alarmAdapter.notifyDataSetChanged();
+    }
+
+    private void fakeDataForTests() {
+        AlarmsDataManager.getInstance().addFakeData();
         alarmAdapter.notifyDataSetChanged();
     }
 }

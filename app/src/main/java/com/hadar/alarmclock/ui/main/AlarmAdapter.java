@@ -19,9 +19,8 @@ import java.util.ArrayList;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.RecyclerView;
 
-public class AlarmAdapter extends RecyclerView.Adapter<AlarmViewHolder> {
+public class AlarmAdapter extends EmptyRecyclerView.Adapter<AlarmViewHolder> {
 
     private ArrayList<Alarm> alarmsArrayList;
     private Context context;

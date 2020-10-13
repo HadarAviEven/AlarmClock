@@ -20,5 +20,6 @@
     <string name="minutes_pattern">mm</string>
     <string name="result_alarm">resultAlarm</string>
     <string name="id">id</string>
-    <string name="Boot">android.intent.action.BOOT_COMPLETED</string>
+    <string name="boot">android.intent.action.BOOT_COMPLETED</string>
+    <string name="no_alarms">No Alarms Yet :)</string>
 </resources>
