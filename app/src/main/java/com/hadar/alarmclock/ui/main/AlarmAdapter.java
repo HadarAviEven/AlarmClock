@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 import android.widget.TextView;
 
 import com.hadar.alarmclock.ui.addalarm.helpers.SetAlarmHelper;
@@ -75,24 +76,13 @@ public class AlarmAdapter extends RecyclerView.Adapter<AlarmViewHolder> {
 //        holder.status.setChecked(currentItem.getStatus());
 
 
-//        holder.status.setOnCheckedChangeListener(null);
-//
-//        holder.status.setChecked(currentItem.getStatus());
-//
-//        holder.status.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-//            @Override
-//            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-//                changeAlarmStatus(position, isChecked);
-//                changeAlarmVisibility(holder.time, isChecked);
-//                changeAlarmSetHelper(position, false);
-//            }
-//        });
+        holder.status.setOnCheckedChangeListener(null);
 
+        holder.status.setChecked(currentItem.getStatus());
 
-        holder.status.setOnClickListener(new View.OnClickListener() {
+        holder.status.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
-            public void onClick(View v) {
-                boolean isChecked = holder.status.isChecked();
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 updateStatus(position, isChecked);
                 updateTimeColor(holder.time, isChecked);
                 updateDaysColor(holder, currentItem);
@@ -100,7 +90,19 @@ public class AlarmAdapter extends RecyclerView.Adapter<AlarmViewHolder> {
             }
         });
 
-        holder.status.setChecked(currentItem.getStatus());
+
+//        holder.status.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                boolean isChecked = holder.status.isChecked();
+//                updateStatus(position, isChecked);
+//                updateTimeColor(holder.time, isChecked);
+//                updateDaysColor(holder, currentItem);
+//                updateAlarmSetHelper(position, false);
+//            }
+//        });
+//
+//        holder.status.setChecked(currentItem.getStatus());
     }
 
     private void updateStatus(int position, boolean isChecked) {
