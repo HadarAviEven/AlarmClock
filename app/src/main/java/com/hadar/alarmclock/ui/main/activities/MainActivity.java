@@ -69,7 +69,6 @@ public class MainActivity extends AppCompatActivity {
         startActivityForResult(intent, LAUNCH_SECOND_ACTIVITY);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);

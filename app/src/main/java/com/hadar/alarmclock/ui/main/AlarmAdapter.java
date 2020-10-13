@@ -111,7 +111,7 @@ public class AlarmAdapter extends RecyclerView.Adapter<AlarmViewHolder> {
 
     private void updateAlarmSetHelper(int position, boolean isDeleted) {
         SetAlarmHelper setAlarmHelper = new SetAlarmHelper(context);
-        setAlarmHelper.startAlarm(alarmsArrayList.get(position), isDeleted);
+        setAlarmHelper.setAlarm(alarmsArrayList.get(position), isDeleted);
     }
 
     private void setTime(AlarmViewHolder holder, Alarm currentItem) {

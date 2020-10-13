@@ -17,7 +17,7 @@ public class SetDaysAlarmHelper {
             ArrayList<Days> nextDayArray = new ArrayList<>();
             nextDayArray.add(originSelectedDays.get(i));
             alarm.setSelectedDays(nextDayArray);
-            setAlarmHelper.startAlarm(alarm, false);
+            setAlarmHelper.setAlarm(alarm, false);
         }
         alarm.setSelectedDays(originSelectedDays);
     }

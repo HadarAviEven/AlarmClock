@@ -25,7 +25,7 @@ public class SetAlarmHelper {
         this.context = context;
     }
 
-    public void startAlarm(Alarm alarm, boolean isDeleted) {
+    public void setAlarm(Alarm alarm, boolean isDeleted) {
         init(alarm);
         checkCases(alarm, isDeleted);
     }
@@ -119,18 +119,18 @@ public class SetAlarmHelper {
     }
 
     private void addToAlarmManager(Calendar calendar) {
-//        alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+        alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
 
-        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,
-                calendar.getTimeInMillis(), pendingIntent);
+//        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,
+//                calendar.getTimeInMillis(), pendingIntent);
     }
 
     private void addToAlarmManagerRepeatedly(Calendar calendar) {
-//        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(),
-//                AlarmManager.INTERVAL_DAY  /*1000 * 60 * 60 * 24*/ * 7, pendingIntent);
+        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(),
+                AlarmManager.INTERVAL_DAY  /*1000 * 60 * 60 * 24*/ * 7, pendingIntent);
 
-        alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,
-                /*AlarmManager.INTERVAL_DAY*/  1000 * 60 * 60 * 24 * 7, pendingIntent);
+//        alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,
+//                /*AlarmManager.INTERVAL_DAY*/  1000 * 60 * 60 * 24 * 7, pendingIntent);
     }
 
     private void cancelFromAlarmManager() {

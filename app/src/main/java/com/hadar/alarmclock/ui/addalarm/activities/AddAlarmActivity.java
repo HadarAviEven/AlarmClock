@@ -103,7 +103,7 @@ public class AddAlarmActivity extends AppCompatActivity {
 
     private void setAlarmHelper(Alarm alarm) {
         SetAlarmHelper setAlarmHelper = new SetAlarmHelper(getApplicationContext());
-        setAlarmHelper.startAlarm(alarm, false);
+        setAlarmHelper.setAlarm(alarm, false);
     }
 
     private void initAllPickers() {
