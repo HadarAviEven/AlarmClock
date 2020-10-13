@@ -11,7 +11,7 @@ import android.util.Log;
 import com.hadar.alarmclock.R;
 import com.hadar.alarmclock.ui.addalarm.models.Alarm;
 import com.hadar.alarmclock.ui.main.receivers.AlarmReceiver;
-import com.hadar.alarmclock.ui.main.receivers.SampleBootReceiver;
+import com.hadar.alarmclock.ui.main.receivers.BootReceiver;
 
 import java.util.Calendar;
 
@@ -138,7 +138,7 @@ public class SetAlarmHelper {
     }
 
     private void addToBootReceiver() {
-        ComponentName receiver = new ComponentName(context, SampleBootReceiver.class);
+        ComponentName receiver = new ComponentName(context, BootReceiver.class);
         PackageManager pm = context.getPackageManager();
 
         pm.setComponentEnabledSetting(receiver,
@@ -147,7 +147,7 @@ public class SetAlarmHelper {
     }
 
     private void cancelFromBootReceiver() {
-        ComponentName receiver = new ComponentName(context, SampleBootReceiver.class);
+        ComponentName receiver = new ComponentName(context, BootReceiver.class);
         PackageManager pm = context.getPackageManager();
 
         pm.setComponentEnabledSetting(receiver,

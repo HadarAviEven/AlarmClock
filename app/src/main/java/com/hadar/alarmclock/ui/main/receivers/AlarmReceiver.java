@@ -13,6 +13,7 @@ public class AlarmReceiver extends BroadcastReceiver {
 //        MediaPlayer mediaPlayer = MediaPlayer.create(context, R.raw.alarm);
 //        mediaPlayer.start();
 
-        Log.e("AlarmReceiver", "Alarm!!!");
+        String msg = "Alarm!!!";
+        Log.e("AlarmReceiver", msg);
     }
 }

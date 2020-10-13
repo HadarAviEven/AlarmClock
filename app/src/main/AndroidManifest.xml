@@ -23,7 +23,7 @@
         <receiver android:name=".ui.main.receivers.AlarmReceiver" />
 
         <receiver
-            android:name=".ui.main.receivers.SampleBootReceiver"
+            android:name=".ui.main.receivers.BootReceiver"
             android:enabled="false">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
