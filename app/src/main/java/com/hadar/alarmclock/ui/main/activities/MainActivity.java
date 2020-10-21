@@ -3,11 +3,13 @@ package com.hadar.alarmclock.ui.main.activities;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.hadar.alarmclock.data.AlarmsDataManager;
 import com.hadar.alarmclock.R;
+import com.hadar.alarmclock.data.db.AlarmDatabase;
+import com.hadar.alarmclock.data.db.AppExecutors;
 import com.hadar.alarmclock.ui.addalarm.activities.AddAlarmActivity;
 import com.hadar.alarmclock.ui.addalarm.models.Alarm;
 import com.hadar.alarmclock.ui.main.EmptyRecyclerView;
@@ -15,6 +17,9 @@ import com.hadar.alarmclock.ui.main.events.DataSyncEvent;
 import com.hadar.alarmclock.ui.main.AlarmAdapter;
 
 import org.greenrobot.eventbus.Subscribe;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -27,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
     private AlarmAdapter alarmAdapter;
     private FloatingActionButton fab;
     private final int LAUNCH_SECOND_ACTIVITY = 1;
-    public static int UNIQUE_ID = -1;
+    private AlarmDatabase mDb;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,8 +42,12 @@ public class MainActivity extends AppCompatActivity {
         findViews();
         initRecyclerView();
         initFab();
+        initDB();
+        retrieveTasks();
+    }
 
-//        fakeDataForTests();
+    private void initDB() {
+        mDb = AlarmDatabase.getInstance(getApplicationContext());
     }
 
     private void findViews() {
@@ -50,9 +59,10 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setHasFixedSize(true);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
-        alarmAdapter = new AlarmAdapter(AlarmsDataManager.getInstance().alarmsArrayList, this);
-        recyclerView.setEmptyView(findViewById(R.id.emptyView));
+        alarmAdapter = new AlarmAdapter(this);
         recyclerView.setAdapter(alarmAdapter);
+        recyclerView.setEmptyView(findViewById(R.id.emptyView));
+        recyclerView.initEmptyView();
     }
 
     private void initFab() {
@@ -75,11 +85,44 @@ public class MainActivity extends AppCompatActivity {
 
         if (requestCode == LAUNCH_SECOND_ACTIVITY) {
             if (resultCode == Activity.RESULT_OK) {
-                Alarm resultAlarm = data.getParcelableExtra(getString(R.string.result_alarm));
-                AlarmsDataManager.getInstance().addAlarm(resultAlarm);
-                alarmAdapter.notifyDataSetChanged();
+                final Alarm resultAlarm = data.getParcelableExtra(getString(R.string.result_alarm));
+
+                AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        mDb.alarmDao().insertAlarm(resultAlarm);
+
+                        List<Alarm> list = mDb.alarmDao().loadAllAlarms();
+                        for (Alarm alarm : list) {
+                            Log.e("MainActivity", "alarm id = " + alarm.getId());
+                        }
+                    }
+                });
+
+//                ArrayList<Alarm> a = new ArrayList<>(list);
+//                alarmAdapter.setData(a);
+
+                alarmAdapter.addData(resultAlarm);//
             }
         }
+    }
+
+    private void retrieveTasks() {
+        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                final List<Alarm> alarmsList = mDb.alarmDao().loadAllAlarms();
+                final ArrayList<Alarm> alarmsArrayList = new ArrayList<>(alarmsList);
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        alarmAdapter.setData(alarmsArrayList);
+                        recyclerView.initEmptyView();
+                    }
+                });
+            }
+        });
     }
 
     @Override
@@ -96,11 +139,6 @@ public class MainActivity extends AppCompatActivity {
 
     @Subscribe
     public void onEvent(DataSyncEvent syncStatusMessage) {
-        alarmAdapter.notifyDataSetChanged();
-    }
-
-    private void fakeDataForTests() {
-        AlarmsDataManager.getInstance().addFakeData();
         alarmAdapter.notifyDataSetChanged();
     }
 }

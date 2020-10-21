@@ -3,19 +3,22 @@ package com.hadar.alarmclock.ui.main;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.TextView;
 
+import com.hadar.alarmclock.data.db.AlarmDatabase;
+import com.hadar.alarmclock.data.db.AppExecutors;
 import com.hadar.alarmclock.ui.addalarm.helpers.SetAlarmHelper;
-import com.hadar.alarmclock.data.AlarmsDataManager;
 import com.hadar.alarmclock.R;
 import com.hadar.alarmclock.ui.addalarm.enums.Days;
 import com.hadar.alarmclock.ui.addalarm.models.Alarm;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
@@ -24,16 +27,27 @@ public class AlarmAdapter extends EmptyRecyclerView.Adapter<AlarmViewHolder> {
 
     private ArrayList<Alarm> alarmsArrayList;
     private Context context;
+    private AlarmDatabase mDb;
 
-    public AlarmAdapter(ArrayList<Alarm> newAlarmsArrayList, Context context) {
-        this.alarmsArrayList = newAlarmsArrayList;
+    public AlarmAdapter(Context context) {
         this.context = context;
+        mDb = AlarmDatabase.getInstance(context);
+    }
+
+    public void setData(ArrayList<Alarm> newAlarmsArrayList) {
+        this.alarmsArrayList = newAlarmsArrayList;
+        notifyDataSetChanged();
+    }
+
+    public void addData(Alarm alarm) {
+        alarmsArrayList.add(alarm);
+        notifyDataSetChanged();
     }
 
     @NonNull
     @Override
     public AlarmViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_alarm, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.alarm_item, parent, false);
         return new AlarmViewHolder(view);
     }
 
@@ -104,8 +118,24 @@ public class AlarmAdapter extends EmptyRecyclerView.Adapter<AlarmViewHolder> {
 //        holder.status.setChecked(currentItem.getStatus());
     }
 
-    private void updateStatus(int position, boolean isChecked) {
-        AlarmsDataManager.getInstance().setStatus(position, isChecked);
+    private void updateStatus(final int position, final boolean isChecked) {
+
+        final Alarm alarmToUpdate = alarmsArrayList.get(position);
+        alarmToUpdate.setStatus(isChecked);
+        notifyDataSetChanged();
+
+        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                Log.e(" alarmToUpdate", "id " + alarmToUpdate.getId() + " status " + alarmToUpdate.getStatus());
+                mDb.alarmDao().updateAlarm(alarmToUpdate);
+
+                List<Alarm> list = mDb.alarmDao().loadAllAlarms();
+                for (Alarm alarm : list) {
+                    Log.e(" loadAllAlarms", "id " + alarm.getId() + " status " + alarm.getStatus());
+                }
+            }
+        });
     }
 
     private void updateAlarmSetHelper(int position, boolean isDeleted) {
@@ -189,9 +219,27 @@ public class AlarmAdapter extends EmptyRecyclerView.Adapter<AlarmViewHolder> {
             @Override
             public void onClick(DialogInterface arg0, int arg1) {
                 updateAlarmSetHelper(position, true);
-                AlarmsDataManager.getInstance().removeAlarm(position);
+
+                final Alarm alarmToRemove = alarmsArrayList.get(position);
+                Log.e(" alarmToRemove", "id " + alarmToRemove.getId());
+
+                AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        mDb.alarmDao().deleteAlarm(alarmToRemove);
+
+                        List<Alarm> list = mDb.alarmDao().loadAllAlarms();
+                        for (Alarm alarm : list) {
+                            Log.e(" alarms left", "id " + alarm.getId());
+                        }
+                    }
+                });
+
+                alarmsArrayList.remove(alarmToRemove);
+                notifyDataSetChanged();
             }
         });
+
         alertDialogBuilder.setNegativeButton("No", null);
 
         AlertDialog alertDialog = alertDialogBuilder.create();
@@ -200,6 +248,8 @@ public class AlarmAdapter extends EmptyRecyclerView.Adapter<AlarmViewHolder> {
 
     @Override
     public int getItemCount() {
+        if (alarmsArrayList == null)
+            return 0;
         return alarmsArrayList.size();
     }
 }

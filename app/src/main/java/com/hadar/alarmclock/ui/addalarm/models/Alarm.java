@@ -3,34 +3,47 @@ package com.hadar.alarmclock.ui.addalarm.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.hadar.alarmclock.data.db.converters.DaysConverter;
 import com.hadar.alarmclock.ui.addalarm.helpers.TimeConverterHelper;
 import com.hadar.alarmclock.ui.addalarm.enums.Days;
-import com.hadar.alarmclock.ui.main.activities.MainActivity;
 
 import java.util.ArrayList;
 
-public class Alarm implements Parcelable {
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+import androidx.room.TypeConverters;
 
-    private boolean status;
-    private int hour;
-    private int minute;
-    private ArrayList<Days> days;
+@Entity(tableName = "alarm")
+public class Alarm implements Parcelable {
+    @PrimaryKey(autoGenerate = true)
     private int id;
+    @ColumnInfo(name = "status")
+    private boolean status;
+    @ColumnInfo(name = "hour")
+    private int hour;
+    @ColumnInfo(name = "minute")
+    private int minute;
+    @TypeConverters(DaysConverter.class)
+    public ArrayList<Days> days;
+
+    public Alarm() {
+
+    }
 
     public Alarm(boolean newStatus, int newHour, int newMinute, ArrayList<Days> newDays) {
         status = newStatus;
         hour = newHour;
         minute = newMinute;
         days = newDays;
-        id = ++MainActivity.UNIQUE_ID;
     }
 
     public boolean getStatus() {
         return status;
     }
 
-    public void setStatus(boolean status) {
-        this.status = status;
+    public int getHour() {
+        return hour;
     }
 
     public int getIntHour() {
@@ -39,6 +52,10 @@ public class Alarm implements Parcelable {
 
     public String getStringHour() {
         return TimeConverterHelper.getStringPresentation(hour);
+    }
+
+    public int getMinute() {
+        return minute;
     }
 
     public int getIntMinute() {
@@ -53,16 +70,28 @@ public class Alarm implements Parcelable {
         return days;
     }
 
-    public void setSelectedDays(ArrayList<Days> days) {
-        this.days = days;
-    }
-
     public int getId() {
         return id;
     }
 
-    public void clearSelectedDays() {
-        days.clear();
+    public void setStatus(boolean status) {
+        this.status = status;
+    }
+
+    public void setHour(int hour) {
+        this.hour = hour;
+    }
+
+    public void setMinute(int minute) {
+        this.minute = minute;
+    }
+
+    public void setSelectedDays(ArrayList<Days> days) {
+        this.days = days;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     @Override
