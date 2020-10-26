@@ -44,6 +44,16 @@ public class AlarmAdapter extends EmptyRecyclerView.Adapter<AlarmViewHolder> {
         notifyDataSetChanged();
     }
 
+    public void removeData(Alarm alarm) {
+        alarmsArrayList.remove(alarm);
+        notifyDataSetChanged();
+    }
+
+    public void updateData(Alarm alarm, boolean isChecked) {
+        alarm.setStatus(isChecked);
+        notifyDataSetChanged();
+    }
+
     @NonNull
     @Override
     public AlarmViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {

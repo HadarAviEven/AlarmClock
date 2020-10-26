@@ -17,7 +17,7 @@ public interface AlarmDao {
     List<Alarm> loadAllAlarms();
 
     @Insert
-    void insertAlarm(Alarm alarm);
+    long insertAlarm(Alarm alarm);
 
     @Update
     void updateAlarm(Alarm alarm);

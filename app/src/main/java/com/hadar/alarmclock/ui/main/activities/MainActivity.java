@@ -86,23 +86,31 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == LAUNCH_SECOND_ACTIVITY) {
             if (resultCode == Activity.RESULT_OK) {
                 final Alarm resultAlarm = data.getParcelableExtra(getString(R.string.result_alarm));
+                final long[] newId = new long[1];
 
                 AppExecutors.getInstance().diskIO().execute(new Runnable() {
                     @Override
                     public void run() {
-                        mDb.alarmDao().insertAlarm(resultAlarm);
+                        newId[0] = mDb.alarmDao().insertAlarm(resultAlarm);
+                        Log.e("MainActivity", "run: newId = " + newId[0]);
 
                         List<Alarm> list = mDb.alarmDao().loadAllAlarms();
                         for (Alarm alarm : list) {
                             Log.e("MainActivity", "alarm id = " + alarm.getId());
                         }
+
+                        AppExecutors.getInstance().mainThread().execute(new Runnable() {
+                            @Override
+                            public void run() {
+                                resultAlarm.setId((int) newId[0]);
+                                alarmAdapter.addData(resultAlarm);
+                            }
+                        });
+//                        Option 2:
+//                        resultAlarm.setId((int) newId[0]);
+//                        EventBus.getDefault().post(resultAlarm);
                     }
                 });
-
-//                ArrayList<Alarm> a = new ArrayList<>(list);
-//                alarmAdapter.setData(a);
-
-                alarmAdapter.addData(resultAlarm);//
             }
         }
     }
@@ -140,5 +148,20 @@ public class MainActivity extends AppCompatActivity {
     @Subscribe
     public void onEvent(DataSyncEvent syncStatusMessage) {
         alarmAdapter.notifyDataSetChanged();
+    }
+
+    @Subscribe
+    public void onAlarmInsert(Alarm alarm) {
+        alarmAdapter.addData(alarm);
+    }
+
+    @Subscribe
+    public void onAlarmDelete(Alarm alarm) {
+        alarmAdapter.removeData(alarm);
+    }
+
+    @Subscribe
+    public void onAlarmStatusChange(Alarm alarm, boolean isChanged) {
+        alarmAdapter.updateData(alarm, isChanged);
     }
 }
