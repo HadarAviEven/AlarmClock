@@ -12,10 +12,14 @@ import android.widget.TextView;
 
 import com.hadar.alarmclock.data.db.AlarmDatabase;
 import com.hadar.alarmclock.data.db.AppExecutors;
+import com.hadar.alarmclock.ui.addalarm.enums.EventType;
 import com.hadar.alarmclock.ui.addalarm.helpers.SetAlarmHelper;
 import com.hadar.alarmclock.R;
 import com.hadar.alarmclock.ui.addalarm.enums.Days;
 import com.hadar.alarmclock.ui.addalarm.models.Alarm;
+import com.hadar.alarmclock.ui.main.events.AlarmEvent;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,17 +43,17 @@ public class AlarmAdapter extends EmptyRecyclerView.Adapter<AlarmViewHolder> {
         notifyDataSetChanged();
     }
 
-    public void addData(Alarm alarm) {
+    public void addAlarm(Alarm alarm) {
         alarmsArrayList.add(alarm);
         notifyDataSetChanged();
     }
 
-    public void removeData(Alarm alarm) {
+    public void removeAlarm(Alarm alarm) {
         alarmsArrayList.remove(alarm);
         notifyDataSetChanged();
     }
 
-    public void updateData(Alarm alarm, boolean isChecked) {
+    public void updateAlarm(Alarm alarm, boolean isChecked) {
         alarm.setStatus(isChecked);
         notifyDataSetChanged();
     }
@@ -109,7 +113,6 @@ public class AlarmAdapter extends EmptyRecyclerView.Adapter<AlarmViewHolder> {
                 updateStatus(position, isChecked);
                 updateTimeColor(holder.time, isChecked);
                 updateDaysColor(holder, currentItem);
-                updateAlarmSetHelper(position, false);
             }
         });
 
@@ -129,23 +132,8 @@ public class AlarmAdapter extends EmptyRecyclerView.Adapter<AlarmViewHolder> {
     }
 
     private void updateStatus(final int position, final boolean isChecked) {
-
-        final Alarm alarmToUpdate = alarmsArrayList.get(position);
-        alarmToUpdate.setStatus(isChecked);
-        notifyDataSetChanged();
-
-        AppExecutors.getInstance().diskIO().execute(new Runnable() {
-            @Override
-            public void run() {
-                Log.e(" alarmToUpdate", "id " + alarmToUpdate.getId() + " status " + alarmToUpdate.getStatus());
-                mDb.alarmDao().updateAlarm(alarmToUpdate);
-
-                List<Alarm> list = mDb.alarmDao().loadAllAlarms();
-                for (Alarm alarm : list) {
-                    Log.e(" loadAllAlarms", "id " + alarm.getId() + " status " + alarm.getStatus());
-                }
-            }
-        });
+        updateAlarmSetHelper(position, false);
+        updateData(position, isChecked);
     }
 
     private void updateAlarmSetHelper(int position, boolean isDeleted) {
@@ -229,24 +217,7 @@ public class AlarmAdapter extends EmptyRecyclerView.Adapter<AlarmViewHolder> {
             @Override
             public void onClick(DialogInterface arg0, int arg1) {
                 updateAlarmSetHelper(position, true);
-
-                final Alarm alarmToRemove = alarmsArrayList.get(position);
-                Log.e(" alarmToRemove", "id " + alarmToRemove.getId());
-
-                AppExecutors.getInstance().diskIO().execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        mDb.alarmDao().deleteAlarm(alarmToRemove);
-
-                        List<Alarm> list = mDb.alarmDao().loadAllAlarms();
-                        for (Alarm alarm : list) {
-                            Log.e(" alarms left", "id " + alarm.getId());
-                        }
-                    }
-                });
-
-                alarmsArrayList.remove(alarmToRemove);
-                notifyDataSetChanged();
+                deleteData(position);
             }
         });
 
@@ -261,5 +232,37 @@ public class AlarmAdapter extends EmptyRecyclerView.Adapter<AlarmViewHolder> {
         if (alarmsArrayList == null)
             return 0;
         return alarmsArrayList.size();
+    }
+
+    public void updateData(int position, boolean isChecked) {
+        final Alarm alarmToUpdate = alarmsArrayList.get(position);
+        EventBus.getDefault().post(new AlarmEvent(new EventType(EventType.Type.UPDATE), alarmToUpdate, isChecked));
+
+        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                Log.e(" alarmToUpdate", "id " + alarmToUpdate.getId() + " status " + alarmToUpdate.getStatus());
+                mDb.alarmDao().updateAlarm(alarmToUpdate);
+
+                List<Alarm> list = mDb.alarmDao().loadAllAlarms();
+                EventBus.getDefault().post(list);
+            }
+        });
+    }
+
+    public void deleteData(int position) {
+        final Alarm alarmToRemove = alarmsArrayList.get(position);
+        Log.e(" alarmToRemove", "id " + alarmToRemove.getId());
+
+        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                mDb.alarmDao().deleteAlarm(alarmToRemove);
+
+                List<Alarm> list = mDb.alarmDao().loadAllAlarms();
+                EventBus.getDefault().post(list);
+            }
+        });
+        EventBus.getDefault().post(new AlarmEvent(new EventType(EventType.Type.DELETE), alarmToRemove));
     }
 }

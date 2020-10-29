@@ -11,12 +11,15 @@ import com.hadar.alarmclock.R;
 import com.hadar.alarmclock.data.db.AlarmDatabase;
 import com.hadar.alarmclock.data.db.AppExecutors;
 import com.hadar.alarmclock.ui.addalarm.activities.AddAlarmActivity;
+import com.hadar.alarmclock.ui.addalarm.enums.EventType;
 import com.hadar.alarmclock.ui.addalarm.models.Alarm;
 import com.hadar.alarmclock.ui.main.EmptyRecyclerView;
-import com.hadar.alarmclock.ui.main.events.DataSyncEvent;
 import com.hadar.alarmclock.ui.main.AlarmAdapter;
+import com.hadar.alarmclock.ui.main.events.AlarmEvent;
 
+import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +27,6 @@ import java.util.List;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import de.greenrobot.event.EventBus;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -85,32 +87,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (requestCode == LAUNCH_SECOND_ACTIVITY) {
             if (resultCode == Activity.RESULT_OK) {
-                final Alarm resultAlarm = data.getParcelableExtra(getString(R.string.result_alarm));
-                final long[] newId = new long[1];
-
-                AppExecutors.getInstance().diskIO().execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        newId[0] = mDb.alarmDao().insertAlarm(resultAlarm);
-                        Log.e("MainActivity", "run: newId = " + newId[0]);
-
-                        List<Alarm> list = mDb.alarmDao().loadAllAlarms();
-                        for (Alarm alarm : list) {
-                            Log.e("MainActivity", "alarm id = " + alarm.getId());
-                        }
-
-                        AppExecutors.getInstance().mainThread().execute(new Runnable() {
-                            @Override
-                            public void run() {
-                                resultAlarm.setId((int) newId[0]);
-                                alarmAdapter.addData(resultAlarm);
-                            }
-                        });
-//                        Option 2:
-//                        resultAlarm.setId((int) newId[0]);
-//                        EventBus.getDefault().post(resultAlarm);
-                    }
-                });
+                insertData(data);
             }
         }
     }
@@ -145,23 +122,52 @@ public class MainActivity extends AppCompatActivity {
         EventBus.getDefault().unregister(this);
     }
 
-    @Subscribe
-    public void onEvent(DataSyncEvent syncStatusMessage) {
-        alarmAdapter.notifyDataSetChanged();
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onEventMainThread(List<Alarm> list) {
+        Log.e("onEvent", "show");
+        for (Alarm alarm : list) {
+            Log.e("MainActivity", "alarm id = " + alarm.getId());
+        }
     }
 
-    @Subscribe
-    public void onAlarmInsert(Alarm alarm) {
-        alarmAdapter.addData(alarm);
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onEventMainThread(AlarmEvent alarmEvent) {
+        String type = alarmEvent.getEventType();
+
+        switch (type) {
+            case "insert":
+                Log.e("onEvent", "insert");
+                alarmAdapter.addAlarm(alarmEvent.getAlarm());
+                break;
+            case "delete":
+                Log.e("onEvent", "delete");
+                alarmAdapter.removeAlarm(alarmEvent.getAlarm());
+                break;
+            case "update":
+                Log.e("onEvent", "update");
+                alarmAdapter.updateAlarm(alarmEvent.getAlarm(), alarmEvent.getStatus());
+                break;
+            default:
+                break;
+        }
     }
 
-    @Subscribe
-    public void onAlarmDelete(Alarm alarm) {
-        alarmAdapter.removeData(alarm);
-    }
+    public void insertData(Intent data) {
+        final Alarm resultAlarm = data.getParcelableExtra(getString(R.string.result_alarm));
+        final long[] newId = new long[1];
 
-    @Subscribe
-    public void onAlarmStatusChange(Alarm alarm, boolean isChanged) {
-        alarmAdapter.updateData(alarm, isChanged);
+        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                newId[0] = mDb.alarmDao().insertAlarm(resultAlarm);
+                Log.e("MainActivity", "run: newId = " + newId[0]);
+
+                resultAlarm.setId((int) newId[0]);
+                EventBus.getDefault().post(new AlarmEvent(new EventType(EventType.Type.INSERT), resultAlarm));
+
+                List<Alarm> list = mDb.alarmDao().loadAllAlarms();
+                EventBus.getDefault().post(list);
+            }
+        });
     }
 }
