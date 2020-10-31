@@ -51,18 +51,20 @@ public class SetAlarmHelper {
                 } else if (alarm.getSelectedDays().size() == 1) { // alarm has one day selected
                     setDay(calendar, alarm);
                     addAlarm(true, calendar);
-//                    Log.e("SetAlarmHelper", "repeat at " + calendar.getTime().toString());
+                    Log.e("SetAlarmHelper", "repeat at " + calendar.getTime().toString());
+                    Log.e("SetAlarmHelper", "inserted to alarms queue");
                 } else { // alarm has no days selected
                     addAlarm(false, calendar);
-//                    Log.e("SetAlarmHelper", "once at " + calendar.getTime().toString());
+                    Log.e("SetAlarmHelper", "once at " + calendar.getTime().toString());
+                    Log.e("SetAlarmHelper", "inserted to alarms queue");
                 }
             } else { // alarm is off
                 cancelAlarm();
-//                Log.e("SetAlarmHelper", "canceled ");
+                Log.e("SetAlarmHelper", "canceled from alarms queue");
             }
         } else { // alarm is deleted
             cancelAlarm();
-//            Log.e("SetAlarmHelper", "deleted ");
+            Log.e("SetAlarmHelper", "deleted from alarms queue");
         }
     }
 

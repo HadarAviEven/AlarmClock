@@ -11,6 +11,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name=".ui.realtimealarm.activities.RealTimeAlarmActivity" />
         <activity android:name=".ui.addalarm.activities.AddAlarmActivity" />
         <activity android:name=".ui.main.activities.MainActivity">
             <intent-filter>
@@ -21,7 +22,6 @@
         </activity>
 
         <receiver android:name=".ui.main.receivers.AlarmReceiver" />
-
         <receiver
             android:name=".ui.main.receivers.BootReceiver"
             android:enabled="false">
@@ -29,7 +29,6 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
-
     </application>
 
 </manifest>

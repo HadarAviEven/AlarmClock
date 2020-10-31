@@ -41,6 +41,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        if (!EventBus.getDefault().isRegistered(this)) {
+            EventBus.getDefault().register(this);
+        }
+
         findViews();
         initRecyclerView();
         initFab();
@@ -111,15 +115,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-        EventBus.getDefault().register(this);
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        EventBus.getDefault().unregister(this);
+    protected void onDestroy() {
+        if (EventBus.getDefault().isRegistered(this)) {
+            EventBus.getDefault().unregister(this);
+        }
+        super.onDestroy();
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -136,15 +136,15 @@ public class MainActivity extends AppCompatActivity {
 
         switch (type) {
             case "insert":
-                Log.e("onEvent", "insert");
+//                Log.e("onEvent", "inserted to adapter");
                 alarmAdapter.addAlarm(alarmEvent.getAlarm());
                 break;
             case "delete":
-                Log.e("onEvent", "delete");
+//                Log.e("onEvent", "deleted from adapter");
                 alarmAdapter.removeAlarm(alarmEvent.getAlarm());
                 break;
             case "update":
-                Log.e("onEvent", "update");
+//                Log.e("onEvent", "updated in adapter");
                 alarmAdapter.updateAlarm(alarmEvent.getAlarm(), alarmEvent.getStatus());
                 break;
             default:
@@ -160,13 +160,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 newId[0] = mDb.alarmDao().insertAlarm(resultAlarm);
-                Log.e("MainActivity", "run: newId = " + newId[0]);
+//                Log.e("MainActivity", "run: newId = " + newId[0]);
+//                Log.e("MainActivity", "inserted to Database");
+
+//                List<Alarm> list = mDb.alarmDao().loadAllAlarms();
+//                EventBus.getDefault().post(list);
 
                 resultAlarm.setId((int) newId[0]);
                 EventBus.getDefault().post(new AlarmEvent(new EventType(EventType.Type.INSERT), resultAlarm));
-
-                List<Alarm> list = mDb.alarmDao().loadAllAlarms();
-                EventBus.getDefault().post(list);
             }
         });
     }
