@@ -12,6 +12,7 @@ import com.hadar.alarmclock.R;
 import com.hadar.alarmclock.ui.addalarm.models.Alarm;
 import com.hadar.alarmclock.ui.main.receivers.AlarmReceiver;
 import com.hadar.alarmclock.ui.main.receivers.BootReceiver;
+import com.hadar.alarmclock.ui.realtimealarm.activities.RealTimeAlarmActivity;
 
 import java.util.Calendar;
 
@@ -32,6 +33,11 @@ public class SetAlarmHelper {
 
     private void init(Alarm alarm) {
         alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+//        Intent intent = new Intent(this.context, RealTimeAlarmActivity.class);
+//        intent.putExtra(context.getString(R.string.id), alarm.getId());
+//        pendingIntent = PendingIntent.getActivity(this.context,
+//                intent.getIntExtra(context.getString(R.string.id), -1), intent, 0);
+
         Intent intent = new Intent(this.context, AlarmReceiver.class);
         intent.putExtra(context.getString(R.string.id), alarm.getId());
         pendingIntent = PendingIntent.getBroadcast(this.context,
@@ -52,19 +58,19 @@ public class SetAlarmHelper {
                     setDay(calendar, alarm);
                     addAlarm(true, calendar);
                     Log.e("SetAlarmHelper", "repeat at " + calendar.getTime().toString());
-                    Log.e("SetAlarmHelper", "inserted to alarms queue");
                 } else { // alarm has no days selected
                     addAlarm(false, calendar);
                     Log.e("SetAlarmHelper", "once at " + calendar.getTime().toString());
-                    Log.e("SetAlarmHelper", "inserted to alarms queue");
                 }
             } else { // alarm is off
                 cancelAlarm();
-                Log.e("SetAlarmHelper", "canceled from alarms queue");
+//                Log.e("SetAlarmHelper", "canceled from alarms queue");
+                Log.e("SetAlarmHelper", "canceled");
             }
         } else { // alarm is deleted
             cancelAlarm();
-            Log.e("SetAlarmHelper", "deleted from alarms queue");
+//            Log.e("SetAlarmHelper", "deleted from alarms queue");
+            Log.e("SetAlarmHelper", "deleted");
         }
     }
 
@@ -121,10 +127,10 @@ public class SetAlarmHelper {
     }
 
     private void addToAlarmManager(Calendar calendar) {
-        alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+//        alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
 
-//        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,
-//                calendar.getTimeInMillis(), pendingIntent);
+        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,
+                calendar.getTimeInMillis(), pendingIntent);
     }
 
     private void addToAlarmManagerRepeatedly(Calendar calendar) {

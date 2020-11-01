@@ -3,7 +3,6 @@ package com.hadar.alarmclock.ui.main;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,7 +12,6 @@ import android.widget.TextView;
 import com.hadar.alarmclock.data.db.AlarmDatabase;
 import com.hadar.alarmclock.data.db.AppExecutors;
 import com.hadar.alarmclock.ui.addalarm.enums.EventType;
-import com.hadar.alarmclock.ui.addalarm.helpers.SetAlarmHelper;
 import com.hadar.alarmclock.R;
 import com.hadar.alarmclock.ui.addalarm.enums.Days;
 import com.hadar.alarmclock.ui.addalarm.models.Alarm;
@@ -22,10 +20,11 @@ import com.hadar.alarmclock.ui.main.events.AlarmEvent;
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
+
+import static com.hadar.alarmclock.ui.main.activities.MainActivity.updateSetAlarmHelper;
 
 public class AlarmAdapter extends EmptyRecyclerView.Adapter<AlarmViewHolder> {
 
@@ -110,9 +109,7 @@ public class AlarmAdapter extends EmptyRecyclerView.Adapter<AlarmViewHolder> {
         holder.status.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                updateStatus(position, isChecked);
-                updateTimeColor(holder.time, isChecked);
-                updateDaysColor(holder, currentItem);
+                updateStatus(holder, currentItem, position, isChecked);
             }
         });
 
@@ -131,14 +128,10 @@ public class AlarmAdapter extends EmptyRecyclerView.Adapter<AlarmViewHolder> {
 //        holder.status.setChecked(currentItem.getStatus());
     }
 
-    private void updateStatus(final int position, final boolean isChecked) {
+    private void updateStatus(AlarmViewHolder holder, Alarm currentItem, final int position, final boolean isChecked) {
         updateData(position, isChecked);
-        updateAlarmSetHelper(position, false);
-    }
-
-    private void updateAlarmSetHelper(int position, boolean isDeleted) {
-        SetAlarmHelper setAlarmHelper = new SetAlarmHelper(context);
-        setAlarmHelper.setAlarm(alarmsArrayList.get(position), isDeleted);
+        updateTimeColor(holder.time, isChecked);
+        updateDaysColor(holder, currentItem);
     }
 
     private void setTime(AlarmViewHolder holder, Alarm currentItem) {
@@ -216,7 +209,6 @@ public class AlarmAdapter extends EmptyRecyclerView.Adapter<AlarmViewHolder> {
         alertDialogBuilder.setPositiveButton("yes", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface arg0, int arg1) {
-                updateAlarmSetHelper(position, true);
                 deleteData(position);
             }
         });
@@ -236,8 +228,11 @@ public class AlarmAdapter extends EmptyRecyclerView.Adapter<AlarmViewHolder> {
 
     public void updateData(int position, boolean isChecked) {
         final Alarm alarmToUpdate = alarmsArrayList.get(position);
+
+        // update Adapter
         EventBus.getDefault().post(new AlarmEvent(new EventType(EventType.Type.UPDATE), alarmToUpdate, isChecked));
 
+        // update Database
         AppExecutors.getInstance().diskIO().execute(new Runnable() {
             @Override
             public void run() {
@@ -246,19 +241,28 @@ public class AlarmAdapter extends EmptyRecyclerView.Adapter<AlarmViewHolder> {
                 mDb.alarmDao().updateAlarm(alarmToUpdate);
             }
         });
+
+        // update Alarms queue
+        updateSetAlarmHelper(context, alarmsArrayList.get(position), false);
     }
 
     public void deleteData(int position) {
+        // delete from Alarms queue
+        updateSetAlarmHelper(context, alarmsArrayList.get(position), true);
+
         final Alarm alarmToRemove = alarmsArrayList.get(position);
 //        Log.e(" alarmToRemove", "id " + alarmToRemove.getId());
 //        Log.e(" alarmToRemove", "deleted from Database");
 
+        // delete from Database
         AppExecutors.getInstance().diskIO().execute(new Runnable() {
             @Override
             public void run() {
                 mDb.alarmDao().deleteAlarm(alarmToRemove);
             }
         });
+
+        // delete from Adapter
         EventBus.getDefault().post(new AlarmEvent(new EventType(EventType.Type.DELETE), alarmToRemove));
     }
 }

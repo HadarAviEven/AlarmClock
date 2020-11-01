@@ -11,7 +11,6 @@ import android.widget.Button;
 import android.widget.NumberPicker;
 import android.widget.Toast;
 
-import com.hadar.alarmclock.ui.addalarm.helpers.SetAlarmHelper;
 import com.hadar.alarmclock.ui.addalarm.enums.Days;
 import com.hadar.alarmclock.R;
 import com.hadar.alarmclock.ui.addalarm.helpers.TimeConverterHelper;
@@ -79,7 +78,6 @@ public class AddAlarmActivity extends AppCompatActivity {
                 Alarm alarm = new Alarm(true, selectedHour, selectedMinute, selectedDays);
 
                 returnIntent(alarm);
-                setAlarmHelper(alarm);
 
                 showRemainingTimeToast();
             }
@@ -99,11 +97,6 @@ public class AddAlarmActivity extends AppCompatActivity {
         returnIntent.putExtra(getString(R.string.result_alarm), alarm);
         setResult(Activity.RESULT_OK, returnIntent);
         finish();
-    }
-
-    private void setAlarmHelper(Alarm alarm) {
-        SetAlarmHelper setAlarmHelper = new SetAlarmHelper(getApplicationContext());
-        setAlarmHelper.setAlarm(alarm, false);
     }
 
     private void initAllPickers() {

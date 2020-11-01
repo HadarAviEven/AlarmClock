@@ -1,6 +1,7 @@
 package com.hadar.alarmclock.ui.main.activities;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -12,6 +13,7 @@ import com.hadar.alarmclock.data.db.AlarmDatabase;
 import com.hadar.alarmclock.data.db.AppExecutors;
 import com.hadar.alarmclock.ui.addalarm.activities.AddAlarmActivity;
 import com.hadar.alarmclock.ui.addalarm.enums.EventType;
+import com.hadar.alarmclock.ui.addalarm.helpers.SetAlarmHelper;
 import com.hadar.alarmclock.ui.addalarm.models.Alarm;
 import com.hadar.alarmclock.ui.main.EmptyRecyclerView;
 import com.hadar.alarmclock.ui.main.AlarmAdapter;
@@ -159,6 +161,7 @@ public class MainActivity extends AppCompatActivity {
         AppExecutors.getInstance().diskIO().execute(new Runnable() {
             @Override
             public void run() {
+                // insert to Database
                 newId[0] = mDb.alarmDao().insertAlarm(resultAlarm);
 //                Log.e("MainActivity", "run: newId = " + newId[0]);
 //                Log.e("MainActivity", "inserted to Database");
@@ -166,9 +169,19 @@ public class MainActivity extends AppCompatActivity {
 //                List<Alarm> list = mDb.alarmDao().loadAllAlarms();
 //                EventBus.getDefault().post(list);
 
+                // insert to Adapter
                 resultAlarm.setId((int) newId[0]);
                 EventBus.getDefault().post(new AlarmEvent(new EventType(EventType.Type.INSERT), resultAlarm));
+
+                // insert to Alarms queue
+                updateSetAlarmHelper(getApplicationContext(), resultAlarm, false);
+//                Log.e("MainActivity", "inserted to alarms queue");
             }
         });
+    }
+
+    public static void updateSetAlarmHelper(Context context, Alarm alarm, boolean isDeleted) {
+        SetAlarmHelper setAlarmHelper = new SetAlarmHelper(context);
+        setAlarmHelper.setAlarm(alarm, isDeleted);
     }
 }
